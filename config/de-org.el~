@@ -1,0 +1,203 @@
+;;; de-org.el
+;; Org Config for Denver Ellis
+ 
+;; Copyright (c) 2015 Denver S. Ellis
+
+;;Author: Denver Ellis <ellis.denver@yahoo.com>
+;;Maintained By: Denver Ellis <ellis.denver@yahoo.com>
+;;Created: 05 Mar 2019
+;;Last Updated: 05 Mar 2019
+
+;; Keywords: configuration
+;; Homepage: https://github.com/....
+
+;; This program is free software; you can redistribute it and/or
+;; modify it under the terms of the GNU General Public License as
+;; published by the Free Software Foundation; either version 2 of
+;; the License, or (at your option) any later version.
+;;
+;; This program is distributed in the hope that it will be
+;; useful, but WITHOUT ANY WARRANTY; without even the implied
+;; warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+;; PURPOSE.  See the GNU General Public License for more details.
+
+
+(require 'org-agenda)
+
+;; General Settings
+(setq org-directory "~/org")
+(setq org-default-notes-file "~/org/refile.org")
+(defvar org-default-journal-file "~/org/journal.org")
+(setq org-agenda-files (quote ("~/org" "~/org/archive")))
+
+;; Display
+(setq org-cycle-separator-lines 0)
+(setq org-tags-column 80)
+(setq org-agenda-tags-column org-tags-column)
+(setq org-agenda-sticky t)
+
+;; Column View Headings
+(setq org-columns-default-format "%50ITEM(Task) %10Effort(Effort){:} %10CLOCKSUM %16TIMESTAMP_IA")
+
+
+;; === bh/helper-functions ===
+(defun bh/is-project-p ()
+  "Any task with a todo keyword subtask."
+  (save-restriction
+    (widen)
+    (let ((has-subtask)
+	  (subtree-end (save-excursion (org-end-of-subtree t)))
+	  (is-a-task (member (nth 2 (org-heading-components)) org-todo-keywords-1)))
+      (save-excursion
+	(forward-line 1)
+	(while (and (not has-subtask)
+		    (< (point) subtree-end)
+		    (re-search-forward "^\*+ " subtree-end t))
+	  (when (member (org-get-todo-state) org-todo-keywords-1)
+	    (setq has-subtask t))))
+      (and is-a-task has-subtask))))
+(defun bh/find-project-task ()
+  "Move point to the parent (project) task if any."
+  (save-restriction
+    (widen)
+    (let ((parent-task (save-excursion (org-back-to-heading 'invisible-ok) (point))))
+      (while (org-up-heading-safe)
+	(when (member (nth 2 (org-heading-components)) org-todo-keywords-1)
+	  (setq parent-task (point))))
+      (goto-char parent-task)
+      parent-task)))
+
+(defun bh/is-project-subtree-p ()
+  "Any task with a todo keyword that is in a project subtree.
+Callers of this function already widen the buffer view."
+  (let ((task (save-exursion (org-back-to-heading 'invisible-ok)
+			     (point))))
+    (save-excursion
+      (bh/find-project-task)
+      (if (equal (point) task)
+	  nil
+	t))))
+
+;; === Custome State Keywords ===
+(setq org-use-fast-todo-selection t)
+(setq org-todo-keywords
+      '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
+	(sequence "WAITING(w@/!)" "INACTIVE(i)" "|" "CANCELLED(c@/!)" "MEETING")))
+
+;; Custom colors for keywords
+(setq org-todo-keword-faces
+      '(("TODO" :foreground "red" :weight bold)
+	("NEXT" :foreground "blue" :weight bold)
+	("DONE" :foreground "forest green" :weight bold)
+	("WAITING" :foreground "orange" :weight bold)
+	("INACTIVE" :foreground "magenta" :weight bold)
+	("CANCELLED" :foreground "forest green" :weight bold)
+	("MEETING" :foreground "forest green" :weight bold)))
+
+;;Auto-update tags whenever the state is changed
+(setq org-todo-state-tags-triggers
+      '(("CANCELLED" ("CANCELLED" . t))
+	("WAITING" ("WAITING" . t))
+	("INACTIVE" ("WAITING") ("INACTIVE" . t))
+	(done ("WAITING") ("INACTIVE"))
+	("TODO" ("WAITING") ("CANCELLED") ("INACTIVE"))
+	("NEXT" ("WAITING") ("CANCELLED") ("INACTIVE"))
+	("DONE" ("WAITING") ("CANCELLED") ("INACTIVE"))))
+
+(defun de/mark-next-done-parent-tasks-todo ()
+  "Visit each parent task and change NEXT (or DONE) states to TODO."
+  ;; Don't change the value if new state is "DONE"
+  (let ((mystate (or (and (fboundp 'org-state)
+                          (member state
+				  (list "NEXT" "TODO")))
+                     (member (nth 2 (org-heading-components))
+			     (list "NEXT" "TODO")))))
+    (when mystate
+      (save-excursion
+        (while (org-up-heading-safe)
+          (when (member (nth 2 (org-heading-components)) (list "NEXT" "DONE"))
+            (org-todo "TODO")))))))
+(add-hook 'org-after-todo-state-change-hook 'de/mark-next-done-parent-tasks-todo 'append)
+
+;; === Capture Mode Settings ===
+;; define custom capture templates
+(defvar org-capture-templates
+       '(("t" "todo" entry (file org-default-notes-file)
+	  "* TODO %?\n%u\n%a\n" :clock-in t :clock-resume t)
+	 ("b" "Blank" entry (file org-default-notes-file)
+	  "* %?\n%u")
+	 ("m" "Meeting" entry (file org-default-notes-file)
+	  "* MEETING with %? :MEETING:\n" :clock-in t :clock-resume t)
+	 ("d" "Diary" entry (file+datetree "~/org/journal.org")
+	  "* %?\n%U\n" :clock-in t :clock-resume t)
+	 ("D" "Daily Log" entry (file "~/org/daily-log.org")
+	  "* %u %?\n#+BEGIN: gjs-daily-clocktable :maxlevel 4 :date \"%u\" :link t :compact t \n#+END:\n\n*Summary*: \n\n*Problem*: \n\n*Insight*: \n\n*Tomorrow*: " :clock-in t :clock-resume t)
+	 ("i" "Idea" entry (file org-default-notes-file)
+	  "* %? :IDEA: \n%u" :clock-in t :clock-resume t)
+	 ("n" "Next Task" entry (file+headline org-default-notes-file "Tasks")
+	  "** NEXT %? \nDEADLINE: %t")
+	 ("l" "Ledger entries")
+	 ("lc" "MBNA" plain
+	  (file "~/ledger/main-test.ledger")
+	  "%(org-read-date) %^{Payee}
+    ; %^{Comments/Tags}
+    Expenses:%?  %^{Amount}
+    Assets:Checking
+")
+	 ))
+
+;; === Refill ===
+;; Targets include this file and any file contributing to the agenda - up to 9 levels deep
+(setq org-refile-targets (quote ((nil :maxlevel . 9)
+				 (org-agenda-files :maxlevel . 9))))
+
+;; Use full path for refile setup
+(setq org-refile-use-outline-path t)
+(setq org-outline-path-complete-in-steps nil)
+
+;; Allow refile to create parent tasks with confirmation
+(setq org-refile-allow-creating-parent-nodes 'confirm)
+
+;; === Archive ===
+(setq org-archive-location "archive/%s_archive::")
+(defvar org-archive-file-header-format "#+FILETAGS: ARCHIVE\nArchived entries from file %s\n")
+
+;; === Habits ===
+(require 'org-habit)
+(add-to-list 'org-modules 'org-habit)
+(setq org-habit-graph-column 48)
+(setq org-habit-show-habits-only-for-today t)
+
+;; === Checklists ===
+(require 'org-checklist)
+
+;; === Org ID ===
+(require 'org-id) ;may need org-ref
+
+;; === Contacts ===
+(require 'org-contacts)
+
+(defun de-store-org-headline ()
+  (interactive)
+  (when (and (eq major-mode 'org-mode)
+	     (org-at-heading-p))
+    (org-store-link-props
+     :type "file"
+     :link (format "file:*%s" (nth 4 (org-heading-components)))
+     :description (nth 4 (org-heading-components)))))
+
+;;defun detest here
+
+(defun de-helm-org-link-to-contact ()
+  (interactive)
+  (if (eq major-mode 'org-mode)
+      (let ((temp-point (point))
+	    (temp-buffer (current-buffer))
+	    (org-refile-targets (quote (("~/org/contacts.org" :level . 2)))))
+	(org-refile '(4))
+	(let ((link-text (detest))
+	      (desc-text (nth 4 (org-heading-components))))
+	  (unless (eq (current-buffer) temp-buffer) (switch-to-buffer temp-buffer))
+	  (goto-char temp-point)
+	  (insert (concat "[[" link-text "][" desc-text "]]")
+		  )
