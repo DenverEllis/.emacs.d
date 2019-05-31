@@ -9,7 +9,7 @@
 ;;Last Updated: 05 Mar 2019
 
 ;; Keywords: configuration
-;; Homepage: https://github.com/....
+;; Homepage: https://github.com/DenverEllis/.emacs.d.git
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -36,23 +36,37 @@
                          ("elpy" . "http://jorgenschaefer.github.io/packages/"))))
 (package-initialize)
 
+
 ;; Bootstrap `use-package'
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
   (package-install 'use-package))
 
+(use-package diminish :ensure t)
+
+(eval-when-compile
+  (require 'use-package))
+(require 'diminish)
+(require 'bind-key)
+
+
 ;; === Face Customization ==
-(use-package zenburn-theme
-  :ensure t
-  :init
-  (load-theme 'zenburn t))
+(load-file "~/.emacs.d/config/init10-face.el")
+
+
 ;; === Interface ===
+
 
 ;; === Document Editing ===
 (load-file "~/.emacs.d/config/init30-org.el")
+
+
 ;; === Programming & Coding Functions ===
+(load-file "~/.emacs.d/config/init40-codingGen.el")
+
 
 ;; === Misc. ===
+
 
 ;;; init.el ends here
 
