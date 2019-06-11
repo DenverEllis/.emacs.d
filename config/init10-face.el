@@ -36,10 +36,11 @@
       initial-scratch-message nil
       initial-major-mode 'org-mode)
 
-;; Remove Scrollbar, Toolbar, and Menu
+;; Remove Scrollbar, Toolbar, and Menu, full screen
 (menu-bar-mode -1)
 (toggle-scroll-bar -1)
 (tool-bar-mode -1)
+(toggle-frame-fullscreen)
 
 ;; Set default fill column
 (setq-default fill-column 80)
