@@ -63,6 +63,7 @@
 
 ;; === Programming & Coding Functions ===
 (load-file "~/.emacs.d/config/init40-codingGen.el")
+(load-file "~/.emacs.d/config/json-reformat.el")
 
 
 ;; === Misc. ===
@@ -75,9 +76,18 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(ansi-color-faces-vector
+   [default default default italic underline success warning error])
+ '(custom-enabled-themes (quote (zenburn)))
+ '(custom-safe-themes
+   (quote
+    ("54f2d1fcc9bcadedd50398697618f7c34aceb9966a6cbaa99829eb64c0c1f3ca" default)))
+ '(org-export-backends
+   (quote
+    (ascii beamer html icalendar latex man md odt org texinfo)))
  '(package-selected-packages
    (quote
-    (zenburn-theme use-package exec-path-from-shell diminish))))
+    (php-mode flycheck zenburn-theme use-package exec-path-from-shell diminish))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
