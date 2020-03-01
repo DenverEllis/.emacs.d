@@ -29,7 +29,7 @@
 (require 'package)
 (setq package-enable-at-startup nil)
 (setq package-archives (append package-archives
-                         '(("melpa" . "http://melpa.org/packages/")
+                         '(("melpa-stable" . "https://stable.melpa.org/packages/")
                          ("marmalade" . "http://marmalade-repo.org/packages/")
                          ("gnu" . "http://elpa.gnu.org/packages/")
                          ("org" . "http://orgmode.org/elpa/")
@@ -63,6 +63,7 @@
 
 ;; === Programming & Coding Functions ===
 (load-file "~/.emacs.d/config/init40-codingGen.el")
+(load-file "~/.emacs.d/config/init41-lisp.el")
 (load-file "~/.emacs.d/config/json-reformat.el")
 
 
@@ -87,7 +88,7 @@
     (ascii beamer html icalendar latex man md odt org texinfo)))
  '(package-selected-packages
    (quote
-    (php-mode flycheck zenburn-theme use-package exec-path-from-shell diminish))))
+    (slime-repl slime rust-mode php-mode flycheck zenburn-theme use-package exec-path-from-shell diminish))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
