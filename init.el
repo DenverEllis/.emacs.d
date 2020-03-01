@@ -63,6 +63,7 @@
 
 ;; === Programming & Coding Functions ===
 (load-file "~/.emacs.d/config/init40-codingGen.el")
+(load-file "~/.emacs.d/config/init41-lisp.el")
 (load-file "~/.emacs.d/config/json-reformat.el")
 
 
@@ -88,6 +89,7 @@
  '(package-selected-packages
    (quote
     (csharp-mode latex-pretty-symbols flycheck-color-mode-line flycheck-cask gnu-elpa-keyring-update ## rust-mode php-mode flycheck zenburn-theme use-package exec-path-from-shell diminish))))
+    (slime-repl slime rust-mode php-mode flycheck zenburn-theme use-package exec-path-from-shell diminish))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
