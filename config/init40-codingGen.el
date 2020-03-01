@@ -51,5 +51,8 @@
   (ws-butler-global-mode)
   :diminish ws-butler-mode)
 
-  
+;; == SLIME Mode ==
+(load (expand-file-name "~/.quicklisp/slime-helper.el"))
+(setq inferior-lisp-program "sbcl")
+
 ;;; init40-codingGen.el end

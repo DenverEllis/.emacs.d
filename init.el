@@ -29,9 +29,9 @@
 (require 'package)
 (setq package-enable-at-startup nil)
 (setq package-archives (append package-archives
-                         '(("melpa" . "http://melpa.org/packages/")
+                         '(("melpa-stable" . "https://stable.melpa.org/packages/")
                          ("marmalade" . "http://marmalade-repo.org/packages/")
-                         ("gnu" . "http://elpa.gnu.org/packages/")
+                         ("gnu" . "https://elpa.gnu.org/packages/")
                          ("org" . "http://orgmode.org/elpa/")
                          ("elpy" . "http://jorgenschaefer.github.io/packages/"))))
 (package-initialize)
@@ -87,7 +87,7 @@
     (ascii beamer html icalendar latex man md odt org texinfo)))
  '(package-selected-packages
    (quote
-    (php-mode flycheck zenburn-theme use-package exec-path-from-shell diminish))))
+    (csharp-mode latex-pretty-symbols flycheck-color-mode-line flycheck-cask gnu-elpa-keyring-update ## rust-mode php-mode flycheck zenburn-theme use-package exec-path-from-shell diminish))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
